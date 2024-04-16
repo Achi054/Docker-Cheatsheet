@@ -35,6 +35,11 @@ This includes Docker Daemon and CLI tool. The Daemon is a process that keeps on 
 ## Image tag
 A tag is a label applied to a Docker image in a repository. Tags are how various images in a repository are distinguished from each other.
 
+## Volumes
+Volumes are folders in the host machine hard drive which are mounted (made available, mapped) into the containers. 
+
+Volumes persists even if a container is shuts down. A container can read and write to the volumn.
+
 ## Commands to run an app
 ```js
 -- base image or application runtime image.
@@ -203,6 +208,24 @@ docker push <account-name>/<image-name>:<optional-tag>
 ## Pull images from repository
 ```js
 docker pull <account-name>/<image-name>:<optional-tag>
+```
+
+## Check existing volumes
+```js
+docker volume ls
+```
+
+## Run container with volume
+```js
+docker run -p 3000:80 -d --name <container-name> -v feedback:/app/feedback <image-name>
+
+-- feedback:/app/feedback
+-- <host-named-volume>:<container-volume>
+```
+
+## Remove volumes
+```js
+docker volume rm <volume-name>
 ```
 
 
