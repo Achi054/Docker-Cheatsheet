@@ -255,6 +255,16 @@ Windows, if you dont find File sharing, its defaultly enabled.
 docker run -p 3000:80 -d --name <container-name> -v feedback:/app/feedback -v <complete-path-in-host-system>:<path-in-container> <image-name>
 ```
 
+### List volumes
+```js
+docker volume ls
+```
+
+### Inspect volumes
+```js
+docker volume inspect <volume-name>
+```
+
 ### Remove volumes
 ```js
 docker volume rm <volume-name>
