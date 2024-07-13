@@ -270,6 +270,82 @@ docker volume inspect <volume-name>
 docker volume rm <volume-name>
 ```
 
+## ARGuments and ENVironment variables
+### ARGuement
+- Available inside the Dockerfile, not accessible by CMD or any application code
+- Set on image build (_docker build_) via _--build-args_
+
+```js
+docker build -t <image-name>:<tag> --build-args DEFAULT_PORT=8000 .
+```
+
+### ENVironment
+- Available inside of the Dockerfile, accessible in application code
+- Set via _ENV_ in Dockerfile or via _--env_ on _docker run_
+
+```js
+docker run -p 3000:8000 --env PORT:8000 -d --rm <image-name>
+```
+
+You can also have a environment file(_.env_) containing the environment details
+```js
+docker run -p 3000:8081 --env-file ./.env -d --rm <image-name>
+```
+
+## Networks
+Container networking refers to the ability for containers to connect to and communicate with each other, or to non-Docker workloads
+
+### Create Network
+```js
+docker network create <network-name>
+```
+
+### List Networks
+```js
+docker network ls 
+```
+
+### Connecting to WWW 
+Communicating to WWW from the container works outside the box. It works based on the port (-p) exposed from container to host machine.
+
+### Connecting to host services
+Communicating to host machine services is possible through an update in the containerized urls.
+Use _host.docker.internal_ as address, this is understood by the docker engine and maps to the host machine IP address.
+
+```js
+From: mongodb:localhost:27017/swfavorites
+To: mongodb:host.docker.internal:27017/swfavorites
+```
+
+### Connecting to different containers
+Communicating to another container is possible through either by detecting the IP address of a running container by using _docker inspect <container-name>_ command, find _Networkings_ section with node _IPAddress_ and updating the app code with that IP address. This could be cumbersome, as we need to check the IP address of the containers each time its run and update all the apps with the new IP.
+
+There is a better way to get this done by using _--network_
+```js
+-- create network
+docker network create favorites-net
+
+-- update apps connection with container name, the docker engine maps as they belong to the same network.
+
+-- run containers in the same network
+docker run --name mongodb -d --rm --network favorites-net mongo
+docker run --name favorites-app -d --rm --network favorites-net favorites:0.3
+```
+NOTE: When connecting to container to container we do not need to provide the port(--p).
+
+## Runnnig full stack application
+Consider the reference project name _multi-01-starting-setup_.
+
+```js
+-- Running MongoDB database (Image downloaded for DockerHub)
+docker run --name mongodb --rm -d --network goals-net -v data:/data/db -e MONGO_INITDB_ROOT_USERNAME=mongoadmin -e MONGO_INITDB_ROOT_PASSWORD=secret mongo
+
+-- Running backend server
+docker run --name goals-backend --rm -d -p 80:80 --network goals-net -v C:\Users\sujit\source\git\Docker\multi-01-starting-setup\backend:/app -v logs:/app/logs -v /app/node_modules goals-node
+
+-- Running frontend client
+docker run --name goals-frontend --rm -d -p 3000:3000 -it -v C:\Users\sujit\source\git\Docker\multi-01-starting-setup\frontend:/app -v logs:/app/logs goals-react
+```
 
 
 
