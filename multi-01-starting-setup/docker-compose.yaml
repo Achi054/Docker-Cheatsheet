@@ -1,0 +1,54 @@
+# defines the docker compose specification. This key is not required anymore
+version: '3.8'
+# defines the container(s) to be run 
+services:
+  mongodb:
+    image: 'mongo'
+    restart: always
+    volumes:
+      - data:/data/db
+    # alternatively can be used to define the environment variables
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: mongoadmin
+    #   MONGO_INITDB_ROOT_PASSWORD: secret
+    #   - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+    #   - MONGO_INITDB_ROOT_PASSWORD=secret
+    # file path to .env defining the environment variables
+    env_file:
+      - ./env/mongodb.env
+    # this can be ignored as docker compose on run creates a network
+    # and runs all the services in this file under the same network.
+    # networks:
+    #   - goals-net
+  backend:
+    build: ./backend
+    # alternative, giving the context and file name other than default file name.
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    #   args:
+    #     arg1: value
+    ports:
+      - '80:80'
+    volumes:
+      - ./backend:/app
+      - logs:/app/logs
+      - /app/node_modules
+    env_file:
+      - ./env/backend.env
+    # defines list of dependent services(containers) to be up and running before this.
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true    
+
+# specify named volumns that can we used across
+volumes:
+  data:
+  logs:
